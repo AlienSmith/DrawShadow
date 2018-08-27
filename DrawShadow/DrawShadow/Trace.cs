@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DrawShadow
 {
-    public enum TraceType{Line, Ray}
+    public enum TraceType{Line, Ray,undefined}
     class Trace
     {
         public TraceType mytraceType;

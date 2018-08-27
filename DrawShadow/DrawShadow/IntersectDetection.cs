@@ -10,6 +10,7 @@ namespace DrawShadow
 {
     class IntersectDetection
     {
+        public static float CurrentT2;
         public static float IntersetDetection(Trace Ray, Trace Line) {
             //Debug.Assert(Ray.mytraceType == TraceType.Ray && Line.mytraceType == TraceType.Line, "Wrong Trace Type");
             
@@ -31,7 +32,8 @@ namespace DrawShadow
             if (T1 < 0) {
                 return 1000;
             }
-            Debug.WriteLine(T1);
+            CurrentT2 = T2;
+            //Debug.WriteLine(T1);
             return T1;
         }
     }

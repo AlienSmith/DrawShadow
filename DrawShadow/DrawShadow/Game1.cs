@@ -21,7 +21,10 @@ namespace DrawShadow
             Content.RootDirectory = "Content";
             this.drawShadow = new DrawPolygon();
             this.drawShadow.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
-            this.drawShadow.Traces = TraceHelperClass.Range(0, 360, 7.2f, new Vector2(1,1));
+            //this.drawShadow.AddPolygon(new Vector2(300, 300), new Vector2(400, 300), new Vector2(400,400), new Vector2(300, 400));
+            this.drawShadow.Traces = TraceHelperClass.Range(MathHelper.Pi/180f, MathHelper.Pi * 2, (MathHelper.Pi / 200), new Vector2(0, 0));
+            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /120f, MathHelper.Pi*2, (MathHelper.Pi / 60), new Vector2(0, 0)));
+            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /60f, MathHelper.Pi*2, (MathHelper.Pi/60), new Vector2(0, 0)));
         }
 
         /// <summary>
