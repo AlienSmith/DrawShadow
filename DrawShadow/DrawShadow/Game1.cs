@@ -13,19 +13,26 @@ namespace DrawShadow
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        private DrawPolygon drawShadow;
+        //private DrawPolygon drawShadow;
         Vector2 startpoint = PolygongEntity.StartPoint;
+        ShadowManager shadowManager;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            this.drawShadow = new DrawPolygon();
-            this.drawShadow.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
+            //this.drawShadow = new DrawPolygon();
+            //this.drawShadow.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
             //this.drawShadow.AddPolygon(new Vector2(300, 300), new Vector2(400, 300), new Vector2(400,400), new Vector2(300, 400));
-            this.drawShadow.Traces = TraceHelperClass.Range(MathHelper.Pi/240f, MathHelper.Pi * 2, (MathHelper.Pi / 60), new Vector2(20, 0));
+            //this.drawShadow.AddPolygon(new Vector2(100, 400), new Vector2(200, 400), new Vector2(200, 500), new Vector2(100, 500));
+            //this.drawShadow.Traces = TraceHelperClass.Range(MathHelper.Pi/360f, MathHelper.Pi*2, (MathHelper.Pi / 360), new Vector2(20, 0));
             //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /120f, MathHelper.Pi*2, (MathHelper.Pi / 60), new Vector2(0, 20)));
             //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /80f, MathHelper.Pi*2, (MathHelper.Pi/60), new Vector2(-20, 0)));
             //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi / 60f, MathHelper.Pi * 2, (MathHelper.Pi / 60), new Vector2(0, -20)));
+            shadowManager = new ShadowManager();
+            shadowManager.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
+            shadowManager.AddPolygon(new Vector2(300, 300), new Vector2(400, 300), new Vector2(400, 400), new Vector2(300, 400));
+            shadowManager.AddPolygon(new Vector2(100, 400), new Vector2(200, 400), new Vector2(200, 500), new Vector2(100, 500));
+            shadowManager.addLight(MathHelper.Pi / 360f, new Vector2(0, 0));
         }
 
         /// <summary>
@@ -36,8 +43,9 @@ namespace DrawShadow
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
 
+            // TODO: Add your initialization logic here
+            shadowManager.InitiateLight();
             base.Initialize();
         }
 
@@ -49,7 +57,7 @@ namespace DrawShadow
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            this.drawShadow.LoadContent(this.spriteBatch);
+            this.shadowManager.loadContent(spriteBatch);
             // TODO: use this.Content to load your game content here
         }
 
@@ -71,11 +79,7 @@ namespace DrawShadow
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            Vector2 MousePoint = new Vector2(Mouse.GetState().Position.X, Mouse.GetState().Position.Y);
-            foreach (Trace tra in drawShadow.Traces) {
-                tra.StartPoint = MousePoint;
-            }
-            drawShadow.Update();
+            this.shadowManager.Update();
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -91,18 +95,18 @@ namespace DrawShadow
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            this.drawShadow.Draw();
+            shadowManager.Draw();
            
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
-        public void PointLightUpdate() {
+        /*public void PointLightUpdate() {
             Vector2 MousePoint = new Vector2(Mouse.GetState().Position.X, Mouse.GetState().Position.Y);
             Vector2 Extend = MousePoint - startpoint;
             drawShadow.Traces[0].Extend = Extend;
             drawShadow.Update();
             return;
-        }
+        }*/
     }
 }

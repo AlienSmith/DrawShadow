@@ -25,7 +25,7 @@ namespace DrawShadow
             float y1do = Line.Extend.Y;
 
             float T2 = (y1 * xdo - y * xdo + x * ydo - x1 * ydo) / (x1do * ydo - y1do * xdo);
-            if (T2 > 1 || T2 < 0) {
+            if (T2 >= 1 || T2 <= 0) {
                 return 1000;
             }
             float T1 = (y1+y1do*T2-y)/ydo;

@@ -11,20 +11,25 @@ namespace DrawShadow
     public enum TraceType{Line, Ray,undefined}
     class Trace
     {
+        private static int id = 1;
+        public int myid = 0;
         public TraceType mytraceType;
         public Vector2 StartPoint;
         public Vector2 Extend;
+        public Trace(TraceType mytype) { this.mytraceType = mytype;  }
         public Trace(TraceType type, Vector2 Start, Vector2 Extend) {
             this.mytraceType = type;
             this.StartPoint = Start;
             this.Extend = Extend;
+            this.myid = Trace.id;
+            Trace.id++;
         }
         public Trace(Vector2 Start, Vector2 End) {
             this.mytraceType = TraceType.Line;
             this.StartPoint = Start;
             this.Extend = End - Start;
         }
-        public float IntersectPosition(Trace Line) {
+        public float IntersetDetection(Trace Line) {
             return IntersectDetection.IntersetDetection(this,Line);
         }
         public static Vector2 EndPoint(Trace Line) {
@@ -41,6 +46,14 @@ namespace DrawShadow
             result.Add(new Trace(TraceType.Line, Polygon[3], Polygon[0] - Polygon[3]));
 
             return result;
+        }
+        public static List<Vector2> HullTOpoint(Hull hull) {
+            List<Vector2> points = new List<Vector2>();
+            List<Trace> sides = hull.Sides;
+            foreach (Trace t in sides) {
+                points.Add(t.StartPoint);
+            }
+            return points;
         }
         public String ToString
         {

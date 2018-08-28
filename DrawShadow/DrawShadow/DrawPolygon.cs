@@ -15,32 +15,20 @@ namespace DrawShadow
     {
         public List<Trace> Traces;
         public SpriteBatch spriteBatch;
-        public List<Polygon> Polygons;
-        public List<List<Vector2>> PolyInfos;
-        private List<Trace> CurrentLines;// store the information of the currentpolygon
-        public List<Trace> Edge = new List<Trace>();
+        public List<Hull> Hulls = new List<Hull>();
         public TraceType previousType = TraceType.undefined;
         public List<List<Trace>> Ploywithshadow = new List<List<Trace>>();
         public List<Trace> ClosestPoly = new List<Trace>();
         public List<Trace> PreviousClosestPoly = new List<Trace>();
         public Trace PreviousTrace;
-        public List<Trace[]> Shadows = new List<Trace[]>(); // stored int the oreder of S1 E1 E2 S2
+        public List<Trace[]> Shadows = new List<Trace[]>(); // stored int the oreder of S1 E1 E2 S
+        public bool backword = false;
+        public bool start = true;
         public DrawPolygon() {
             Traces = new List<Trace>();
-            Polygons = new List<Polygon>();
-            PolyInfos = new List<List<Vector2>>();
         }
         public void LoadContent(SpriteBatch spriteBatch) {
             this.spriteBatch = spriteBatch;
-        }
-        public void AddPolygon(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
-            List<Vector2> Polygon = new List<Vector2>();
-            Polygon.Add(p1);
-            Polygon.Add(p2);
-            Polygon.Add(p3);
-            Polygon.Add(p4);
-            PolyInfos.Add(Polygon);
-            Polygons.Add(new Polygon(Polygon));
         }
         public void AddLine(Trace Line) {
             Debug.Assert(Line.mytraceType == TraceType.Line, "entered a ray when a line is needed");
@@ -55,110 +43,112 @@ namespace DrawShadow
         {
             float T1;
             float MinT1 = 1000;
-            Vector2 StartPoint = new Vector2(0, 0);
-            Vector2 EndPoint = new Vector2(0, 0);
-            Vector2 StartPoint1 = new Vector2(0, 0);
-            Vector2 EndPoint1 = new Vector2(0, 0);
-            Trace[] sides = new Trace[2];
-            Vector2 tempere = new Vector2(0f, 0f);
-            Vector2 tempere1 = new Vector2(0f, 0f);
-            Trace MinSide = new Trace(TraceType.undefined,new Vector2(0,0),new Vector2(0,0));
-            Trace  MinSide1 = new Trace(TraceType.undefined, new Vector2(0, 0), new Vector2(0, 0));
-            for (int i = 0; i < Edge.Count/2; i++) {
-                Trace Ray = Edge[2*i];
-                foreach (Trace line in Ploywithshadow[2*i])
+            List<Trace> Line;
+            Trace tempLine;
+            foreach(Hull hull in Hulls) {
+                Line = new List<Trace>();
+                tempLine = new Trace(TraceType.undefined);
+                foreach (Trace ray in hull.Bound)
                 {
-                    T1 = Ray.IntersectPosition(line);
-                    if (T1 < MinT1) {
-                        MinT1 = T1;
-                        MinSide = line;
-                    }
+                        foreach (Trace line in hull.Sides)
+                        {
+                            T1 = ray.IntersetDetection(line);
+                            if (T1 < MinT1) {
+                                MinT1 = T1;
+                                tempLine = line;
+                            }
+                        }
+                        MinT1 = 1000;
+                        Line.Add(tempLine);
                 }
-                
-                if (Ray.Extend.Dot( MinSide.Extend) > 0)
+                if (hull.Bound.Count == 1 )
                 {
-                    StartPoint = MinSide.StartPoint + MinSide.Extend;
+                   
                 }
-                else {
-                    StartPoint = MinSide.StartPoint;
-                }
-                tempere.X = Ray.Extend.X;
-                tempere.Y = Ray.Extend.Y;
-                tempere.Normalize();
-                T1 = 1000;
-                MinT1 = 1000;
-                Ray = Edge[2 * i+1];
-                foreach (Trace line in Ploywithshadow[2 * i+1])
+                else if (hull.Bound.Count == 2)
                 {
-                    T1 = Ray.IntersectPosition(line);
-                    if (T1 < MinT1)
+                    if (Line[0].StartPoint == Line[1].StartPoint)
                     {
-                        MinT1 = T1;
-                        MinSide1 = line;
-                    }
-
-                }
-                if (MinSide1.StartPoint.X == MinSide.StartPoint.X&&MinSide1.StartPoint.Y == MinSide.StartPoint.Y)
-                {
-                    //Debug.WriteLine("On the Same Line");
-                    StartPoint = MinSide.StartPoint;
-                    StartPoint1 = MinSide.StartPoint + MinSide.Extend;
-                    tempere = MinSide.StartPoint - Ray.StartPoint;
-                    tempere.Normalize();
-                    tempere1 = MinSide.StartPoint + MinSide.Extend - Ray.StartPoint;
-                    tempere1.Normalize();
-                }
-                else
-                {
-                    //Debug.WriteLine("Not On the Same Line");
-                    if (Ray.Extend.Dot(MinSide1.Extend) > 0)
-                    {
-                        StartPoint1 = MinSide1.StartPoint + MinSide1.Extend;
+                        this.Shadows.Add(this.OnesideEdgeTrace(hull.Bound[0], Line[0]));
                     }
                     else
                     {
-                        StartPoint1 = MinSide1.StartPoint;
+                        Trace[] shadow = new Trace[2];
+                        Trace oneray = hull.Bound[0];
+                        Trace oneline = Line[0];
+                        shadow[0] = this.EdgeTrace(oneray, oneline);
+                        oneray = hull.Bound[1];
+                        oneline = Line[1];
+                        shadow[1] = this.EdgeTrace(oneray, oneline);
+                        this.Shadows.Add(shadow);
+
                     }
-                    tempere1.X = Ray.Extend.X;
-                    tempere1.Y = Ray.Extend.Y;
-                    tempere1.Normalize();
                 }
-                sides[0] = new Trace(TraceType.Line, StartPoint, tempere);
-                sides[1] = new Trace(TraceType.Line, StartPoint1, tempere1);
-                Debug.WriteLine(sides[0].ToString + "" + i);
-                Debug.WriteLine(sides[1].ToString + "" + i);
-                Debug.WriteLine("..........................");
-                this.Shadows.Add(sides);
+                
             }
         }
+        public Trace[] OnesideEdgeTrace(Trace ray,Trace line) {
+            Trace[] shadow = new Trace[2];
+            Vector2 start = line.StartPoint;
+            Vector2 End = line.StartPoint - ray.StartPoint;
+            End.Normalize();
+            shadow[0] = new Trace(TraceType.Line, start, End);
+            start = line.StartPoint + line.Extend;
+            End = start - ray.StartPoint;
+            End.Normalize();
+            shadow[1] = new Trace(TraceType.Line, start, End);
+            return shadow;
+        }
+        public Trace EdgeTrace(Trace ray,Trace line) {
+            Vector2 StartPoint;
+            if (ray.Extend.Dot(line.Extend) > 0)
+            {
+                StartPoint =  line.StartPoint + line.Extend;
+            }
+            else {
+                StartPoint = line.StartPoint;
+            }
+            Vector2 extend = StartPoint - ray.StartPoint;
+            extend.Normalize();
+            return new Trace(TraceType.Line, StartPoint, extend);
+        }
 
-
-        
+        public void InitializeHull() {
+            Debug.WriteLine(this.Hulls.Count + "Hulls in the shadow");
+        }
         public void InitializeUpdate() {
-            Edge = new List<Trace>();
             previousType = TraceType.undefined;
             ClosestPoly = new List<Trace>();
             Shadows = new List<Trace[]>();
             Ploywithshadow = new List<List<Trace>>();
+            this.backword = false;
+            this.start = true;
+            foreach (Hull h in Hulls) {
+                h.Update();
+            }
         }
         public void FindInterSection() {
             float T1 = 1000;
             float T1do = 1000;
+            int HullId = -1;
+            int currentId = -1;
+            int previousId = -1;
             foreach (Trace ray in Traces)
             {
                 ray.Extend.Normalize();
-                foreach (List<Vector2> info in PolyInfos)
+                foreach (Hull hull in Hulls)
                 {
-                    this.CurrentLines = Trace.PolyGonToLines(info);
-                    foreach (Trace line in this.CurrentLines)
+                    HullId = hull.id;
+                    foreach (Trace line in hull.Sides)
                     {
-                        T1do = ray.IntersectPosition(line);
+                        T1do = ray.IntersetDetection(line);
                         if (T1do < T1)
                         {
                             T1 = T1do;
-                            this.ClosestPoly = CurrentLines;
+                            currentId = HullId;
                         }
                     }
+
                 }
                 ray.Extend *= T1;
                 if (T1 < 1000)
@@ -166,23 +156,22 @@ namespace DrawShadow
                     ray.mytraceType = TraceType.Line;
                     if (previousType == TraceType.Ray)
                     {
-                        Edge.Add(ray);
-                        Ploywithshadow.Add(ClosestPoly);
+                        Hulls[currentId].Bound.Add(ray);
                         previousType = ray.mytraceType;
                     }
                     else
                     {
                         PreviousTrace = ray;
-                        PreviousClosestPoly = ClosestPoly;
+                        previousId = currentId;
                     }
+                    
                 }
                 else
                 {
                     ray.mytraceType = TraceType.Ray;
                     if (previousType == TraceType.Line)
                     {
-                        Edge.Add(PreviousTrace);
-                        Ploywithshadow.Add(PreviousClosestPoly);
+                        Hulls[previousId].Bound.Add(PreviousTrace);
                         previousType = ray.mytraceType;
                     }
                 }
@@ -201,20 +190,22 @@ namespace DrawShadow
             foreach (Trace t in Traces) {
                 MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Red, 1);
             }
-            foreach (Trace t in Edge)
+            foreach (Hull h in Hulls)
             {
-                MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Green, 1);
-            }
-            foreach (Polygon p in Polygons)
-            {
-                MonoGame.Extended.ShapeExtensions.DrawPolygon(this.spriteBatch, new Vector2(0, 0), p, Color.Black, 1);
+                this.DrawHull(h);
+                foreach (Trace t in h.Bound)
+                {
+                    MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Green, 1);
+                }
             }
             foreach (Trace[] polygon in Shadows)
             {
                 DrawShaows(polygon);
             }
-           // Debug.WriteLine(Shadows.Count);
+           
+            // Debug.WriteLine(Shadows.Count);
         }
+        
         public void DrawShaows(Trace[] twoside) {
             MonoGame.Extended.ShapeExtensions.DrawPolygon(this.spriteBatch, new Vector2(0, 0), new Polygon(new Vector2[] {
                 twoside[0].StartPoint,
@@ -229,6 +220,10 @@ namespace DrawShadow
                          Color.Black, 3);
             }
             
+        }
+        public void DrawHull(Hull hull) {
+            Polygon poly = new Polygon(Trace.HullTOpoint(hull));
+            MonoGame.Extended.ShapeExtensions.DrawPolygon(this.spriteBatch, new Vector2(0, 0), poly, Color.Black, 1);
         }
         
     }
