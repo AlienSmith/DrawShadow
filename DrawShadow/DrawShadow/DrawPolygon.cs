@@ -158,10 +158,16 @@ namespace DrawShadow
                     {
                         Hulls[currentId].Bound.Add(ray);
                         previousType = ray.mytraceType;
+                        PreviousTrace = ray;
+                        previousId = currentId;
                     }
                     else
                     {
-                        PreviousTrace = ray;
+                        if (previousId != currentId) {
+                            Hulls[currentId].Bound.Add(ray);
+                            Hulls[previousId].Bound.Add(PreviousTrace);
+                        }
+                        PreviousTrace = ray;                          
                         previousId = currentId;
                     }
                     
