@@ -60,6 +60,10 @@ namespace DrawShadow
             Vector2 StartPoint1 = new Vector2(0, 0);
             Vector2 EndPoint1 = new Vector2(0, 0);
             Trace[] sides = new Trace[2];
+            Vector2 tempere = new Vector2(0f, 0f);
+            Vector2 tempere1 = new Vector2(0f, 0f);
+            Trace MinSide = new Trace(TraceType.undefined,new Vector2(0,0),new Vector2(0,0));
+            Trace  MinSide1 = new Trace(TraceType.undefined, new Vector2(0, 0), new Vector2(0, 0));
             for (int i = 0; i < Edge.Count/2; i++) {
                 Trace Ray = Edge[2*i];
                 foreach (Trace line in Ploywithshadow[2*i])
@@ -67,18 +71,20 @@ namespace DrawShadow
                     T1 = Ray.IntersectPosition(line);
                     if (T1 < MinT1) {
                         MinT1 = T1;
-                        if (IntersectDetection.CurrentT2 < 0.5)
-                        {
-                            StartPoint = line.StartPoint;
-                        }
-                        else {
-                            StartPoint = line.StartPoint + line.Extend;
-                        }
+                        MinSide = line;
                     }
-                    
                 }
-                Ray.Extend.Normalize();
-                sides[0] = new Trace(TraceType.Line, StartPoint, Ray.Extend);
+                
+                if (Ray.Extend.Dot( MinSide.Extend) > 0)
+                {
+                    StartPoint = MinSide.StartPoint + MinSide.Extend;
+                }
+                else {
+                    StartPoint = MinSide.StartPoint;
+                }
+                tempere.X = Ray.Extend.X;
+                tempere.Y = Ray.Extend.Y;
+                tempere.Normalize();
                 T1 = 1000;
                 MinT1 = 1000;
                 Ray = Edge[2 * i+1];
@@ -88,19 +94,40 @@ namespace DrawShadow
                     if (T1 < MinT1)
                     {
                         MinT1 = T1;
-                        if (IntersectDetection.CurrentT2 < 0.5)
-                        {
-                            StartPoint1 = line.StartPoint;
-                        }
-                        else
-                        {
-                            StartPoint1 = line.StartPoint + line.Extend;
-                        }
+                        MinSide1 = line;
                     }
 
                 }
-                Ray.Extend.Normalize();
-                sides[1] = new Trace(TraceType.Line, StartPoint1, Ray.Extend);
+                if (MinSide1.StartPoint.X == MinSide.StartPoint.X&&MinSide1.StartPoint.Y == MinSide.StartPoint.Y)
+                {
+                    //Debug.WriteLine("On the Same Line");
+                    StartPoint = MinSide.StartPoint;
+                    StartPoint1 = MinSide.StartPoint + MinSide.Extend;
+                    tempere = MinSide.StartPoint - Ray.StartPoint;
+                    tempere.Normalize();
+                    tempere1 = MinSide.StartPoint + MinSide.Extend - Ray.StartPoint;
+                    tempere1.Normalize();
+                }
+                else
+                {
+                    //Debug.WriteLine("Not On the Same Line");
+                    if (Ray.Extend.Dot(MinSide1.Extend) > 0)
+                    {
+                        StartPoint1 = MinSide1.StartPoint + MinSide1.Extend;
+                    }
+                    else
+                    {
+                        StartPoint1 = MinSide1.StartPoint;
+                    }
+                    tempere1.X = Ray.Extend.X;
+                    tempere1.Y = Ray.Extend.Y;
+                    tempere1.Normalize();
+                }
+                sides[0] = new Trace(TraceType.Line, StartPoint, tempere);
+                sides[1] = new Trace(TraceType.Line, StartPoint1, tempere1);
+                Debug.WriteLine(sides[0].ToString + "" + i);
+                Debug.WriteLine(sides[1].ToString + "" + i);
+                Debug.WriteLine("..........................");
                 this.Shadows.Add(sides);
             }
         }
@@ -112,6 +139,7 @@ namespace DrawShadow
             previousType = TraceType.undefined;
             ClosestPoly = new List<Trace>();
             Shadows = new List<Trace[]>();
+            Ploywithshadow = new List<List<Trace>>();
         }
         public void FindInterSection() {
             float T1 = 1000;
@@ -166,16 +194,17 @@ namespace DrawShadow
                 T1do = 1000;
             }
         }
+        
         public void Draw()
         {
-            /*
+            
             foreach (Trace t in Traces) {
                 MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Red, 1);
             }
             foreach (Trace t in Edge)
             {
-                MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Blue, 1);
-            }*/
+                MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Green, 1);
+            }
             foreach (Polygon p in Polygons)
             {
                 MonoGame.Extended.ShapeExtensions.DrawPolygon(this.spriteBatch, new Vector2(0, 0), p, Color.Black, 1);
@@ -184,9 +213,9 @@ namespace DrawShadow
             {
                 DrawShaows(polygon);
             }
+           // Debug.WriteLine(Shadows.Count);
         }
         public void DrawShaows(Trace[] twoside) {
-            
             MonoGame.Extended.ShapeExtensions.DrawPolygon(this.spriteBatch, new Vector2(0, 0), new Polygon(new Vector2[] {
                 twoside[0].StartPoint,
                 twoside[0].StartPoint + twoside[0].Extend*1000,

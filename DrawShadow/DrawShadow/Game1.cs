@@ -22,9 +22,10 @@ namespace DrawShadow
             this.drawShadow = new DrawPolygon();
             this.drawShadow.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
             //this.drawShadow.AddPolygon(new Vector2(300, 300), new Vector2(400, 300), new Vector2(400,400), new Vector2(300, 400));
-            this.drawShadow.Traces = TraceHelperClass.Range(MathHelper.Pi/180f, MathHelper.Pi * 2, (MathHelper.Pi / 200), new Vector2(0, 0));
-            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /120f, MathHelper.Pi*2, (MathHelper.Pi / 60), new Vector2(0, 0)));
-            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /60f, MathHelper.Pi*2, (MathHelper.Pi/60), new Vector2(0, 0)));
+            this.drawShadow.Traces = TraceHelperClass.Range(MathHelper.Pi/240f, MathHelper.Pi * 2, (MathHelper.Pi / 60), new Vector2(20, 0));
+            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /120f, MathHelper.Pi*2, (MathHelper.Pi / 60), new Vector2(0, 20)));
+            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /80f, MathHelper.Pi*2, (MathHelper.Pi/60), new Vector2(-20, 0)));
+            //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi / 60f, MathHelper.Pi * 2, (MathHelper.Pi / 60), new Vector2(0, -20)));
         }
 
         /// <summary>

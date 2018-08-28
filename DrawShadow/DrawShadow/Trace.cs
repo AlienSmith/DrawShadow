@@ -42,5 +42,12 @@ namespace DrawShadow
 
             return result;
         }
+        public String ToString
+        {
+            get
+            {
+                return "Start" + this.StartPoint + "Extend" + this.Extend;
+            }
+        }
     }
 }

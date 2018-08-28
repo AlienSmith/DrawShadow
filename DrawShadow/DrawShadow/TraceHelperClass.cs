@@ -22,7 +22,7 @@ namespace DrawShadow
         }
         public static Vector2 DegreeToVector(float degree) {
             Vector2 result = new Vector2((float)Math.Cos(degree), (float)Math.Sin(degree));
-            Debug.WriteLine(result);
+            //Debug.WriteLine(result);
             return result;
         }
         
