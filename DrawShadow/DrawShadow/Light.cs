@@ -12,6 +12,8 @@ namespace DrawShadow
     
     class Light
     {
+        public int order = 0;
+        public static int steps = 4;
         public static String LightMask = "LightMask";
         public static int Denominator = 64;
         public static Vector2 origin = new Vector2(32, 32);
@@ -42,14 +44,13 @@ namespace DrawShadow
             this.lightmask = game.Content.Load<Texture2D>(Light.LightMask);
         }
         public void update() {
-            this.dark = Light.drawsideOneLight(this.position, this.Size);
+            //this.dark = Light.drawsideOneLight(this.position, this.Size);
         }
         public void draw(SpriteBatch lightsprite) {
             lightsprite.Draw(texture: lightmask, origin: Light.origin, scale: this.Size/Light.Denominator, position: this.position);
-            for (int i = 0; i < this.dark.Length; i++) {
+            /*for (int i = 0; i < this.dark.Length; i++) {
                 MonoGame.Extended.ShapeExtensions.FillRectangle(lightsprite,this.dark[i], Color.Black);
-            }
-        }
-       
+            }*/
+        }       
     }
 }

@@ -12,16 +12,22 @@ namespace DrawShadow
     class ShadowManager
     {
         public Game1 game;
-        public Light light;
+        public List<Light> lightballs= new List<Light>();
         public SpriteBatch lightSpriteBathch;
         Vector2 lightPosition = new Vector2(0, 0);
         List<DrawPolygon> lights = new List<DrawPolygon>();
         public List<Hull> hulls = new List<Hull>();
+        public List<Trace> DrakLine = new List<Trace>();
         public ShadowManager(Game1 game) {
             this.game = game;
-            light = new Light(game);
-            light.Size = new Vector2(1000, 1000);
+            Light light = new Light(game);
+            light.Size = new Vector2(100, 100);
             light.position = new Vector2(200, 200);
+            lightballs.Add(light);
+            Light light1 = new Light(game);
+            light1.Size = new Vector2(100, 100);
+            light1.position = new Vector2(300, 300);
+            lightballs.Add(light1);
         }
         public void AddPolygon(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
         {
@@ -58,7 +64,10 @@ namespace DrawShadow
             foreach (DrawPolygon light in lights) {
                 light.LoadContent(spriteBatch);
             }
-            light.LoadContent();
+            foreach (Light light in lightballs)
+            {
+                light.LoadContent();
+            }
         }
         public void Update() {
             Vector2 MousePoint = new Vector2(Mouse.GetState().Position.X, Mouse.GetState().Position.Y);
@@ -71,8 +80,8 @@ namespace DrawShadow
                 }
                 light.Update();
             }
-            light.position = MousePoint;
-            light.update();
+            this.CreateDetectLineUpdate();
+            lightballs[0].position = MousePoint;
         }
         public void Draw() {
             foreach (DrawPolygon light in lights)
@@ -81,7 +90,86 @@ namespace DrawShadow
             }
         }
         public void DrawLight() {
-            light.draw(lightSpriteBathch);
+            foreach (Light light in lightballs)
+            {
+                light.draw(lightSpriteBathch);
+            }
+            this.Drawblack();
+        }
+        public void CreateDetectLineUpdate()
+        {
+            this.SortLight();
+            int i = 0;
+            Vector2 extend = new Vector2(Game1.WINDOWSIZE.X, 0);
+            Vector2 start = new Vector2(0, 0);
+            List<Light> currentLights = new List<Light>();
+            while (i < Game1.WINDOWSIZE.Y)
+            {
+                i += Light.steps;
+                start = new Vector2(0, i);
+                foreach (Light light in lightballs) {
+                    if ((light.position.Y - light.Size.Y / 2) < i && i< (light.position.Y + light.Size.Y / 2)) {
+                        currentLights.Add(light);
+                    }
+                }
+                if (currentLights.Count != 0) {
+                    this.sort(currentLights);
+                    foreach (Light light in currentLights) {
+                        extend = new Vector2(light.position.X - light.Size.X / 2,0);
+                        this.DrakLine.Add(new Trace(TraceType.Line, start, extend));
+                        start = new Vector2(light.position.X + light.Size.X / 2,i);
+                    }
+                    extend = new Vector2(Game1.WINDOWSIZE.X - start.X,0);
+                }
+                this.DrakLine.Add(new Trace(TraceType.Line,start,extend));
+                extend = new Vector2(Game1.WINDOWSIZE.X, 0);
+                currentLights = new List<Light>();
+                start = new Vector2(0, 0);
+            }
+        }
+        public void Drawblack() {
+            foreach (Trace darklin in this.DrakLine) {
+                MonoGame.Extended.ShapeExtensions.DrawLine(lightSpriteBathch, darklin.StartPoint, darklin.StartPoint + darklin.Extend, Color.Black, Light.steps);
+            }
+            this.DrakLine = new List<Trace>();
+            
+        }
+        public void SortLight() {
+            float tempfloat = 0;
+            Light currentlight;
+            List<Light> LightsList = new List<Light>();
+            List<float> Lightdistance = new List<float>();
+            foreach (Light light in lightballs)
+            {
+                LightsList.Add(light);
+                Lightdistance.Add(light.position.X - light.Size.X / 2);
+            }
+            for (int m = 0; m < LightsList.Count; m++)
+            {
+                for (int n = m+1; n < LightsList.Count; n++) {
+                    if (Lightdistance[m] > Lightdistance[n]) {
+                        tempfloat = Lightdistance[m];
+                        Lightdistance[m] = Lightdistance[n];
+                        Lightdistance[n] = tempfloat;
+                        currentlight = LightsList[m];
+                        LightsList[m] = LightsList[n];
+                        LightsList[n] = currentlight;
+                        LightsList[m].order = m;
+                    }
+                }
+            }
+        }
+        public void sort(List<Light> lights) {
+            Light currentLight;
+            for (int i = 0; i < lights.Count; i++) {
+                for (int l = i+1; l < lights.Count; l++) {
+                    if (lights[i].order > lights[l].order) {
+                        currentLight = lights[i];
+                        lights[i] = lights[l];
+                        lights[l] = currentLight;
+                    }
+                }
+            }
         }
     }
 }
