@@ -13,6 +13,7 @@ namespace DrawShadow
     }
     class DrawPolygon
     {
+        public bool drawHulls = false;
         public List<Trace> Traces;
         public SpriteBatch spriteBatch;
         public List<Hull> Hulls = new List<Hull>();
@@ -24,6 +25,7 @@ namespace DrawShadow
         public List<Trace[]> Shadows = new List<Trace[]>(); // stored int the oreder of S1 E1 E2 S
         public bool backword = false;
         public bool start = true;
+        public int HulloffSet;
         public DrawPolygon() {
             Traces = new List<Trace>();
         }
@@ -114,7 +116,7 @@ namespace DrawShadow
         }
 
         public void InitializeHull() {
-            Debug.WriteLine(this.Hulls.Count + "Hulls in the shadow");
+            //Debug.WriteLine(this.Hulls.Count + "Hulls in the shadow");
         }
         public void InitializeUpdate() {
             previousType = TraceType.undefined;
@@ -138,7 +140,7 @@ namespace DrawShadow
                 ray.Extend.Normalize();
                 foreach (Hull hull in Hulls)
                 {
-                    HullId = hull.id;
+                    HullId = hull.id - this.HulloffSet;
                     foreach (Trace line in hull.Sides)
                     {
                         T1do = ray.IntersetDetection(line);
@@ -156,6 +158,8 @@ namespace DrawShadow
                     ray.mytraceType = TraceType.Line;
                     if (previousType == TraceType.Ray)
                     {
+                        Debug.WriteLine(Hulls.Count);
+                        Debug.WriteLine(currentId);
                         Hulls[currentId].Bound.Add(ray);
                         previousType = ray.mytraceType;
                         PreviousTrace = ray;
@@ -163,9 +167,10 @@ namespace DrawShadow
                     }
                     else
                     {
-                        if (previousId != currentId) {
+                        if (previousId != currentId && (previousId != -1)) {
                             Hulls[currentId].Bound.Add(ray);
                             Hulls[previousId].Bound.Add(PreviousTrace);
+                            
                         }
                         PreviousTrace = ray;                          
                         previousId = currentId;
@@ -192,16 +197,19 @@ namespace DrawShadow
         
         public void Draw()
         {
-            
-            foreach (Trace t in Traces) {
+
+            /*foreach (Trace t in Traces) {
                 MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Red, 1);
-            }
-            foreach (Hull h in Hulls)
+            }*/
+            if (this.drawHulls)
             {
-                this.DrawHull(h);
-                foreach (Trace t in h.Bound)
+                foreach (Hull h in Hulls)
                 {
-                    MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Green, 1);
+                    this.DrawHull(h);
+                    /*foreach (Trace t in h.Bound)
+                    {
+                        MonoGame.Extended.ShapeExtensions.DrawLine(this.spriteBatch, t.StartPoint, Trace.EndPoint(t), Color.Green, 1);
+                    }*/
                 }
             }
             foreach (Trace[] polygon in Shadows)

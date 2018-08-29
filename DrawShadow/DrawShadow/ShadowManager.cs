@@ -11,8 +11,18 @@ namespace DrawShadow
 {
     class ShadowManager
     {
+        public Game1 game;
+        public Light light;
+        public SpriteBatch lightSpriteBathch;
+        Vector2 lightPosition = new Vector2(0, 0);
         List<DrawPolygon> lights = new List<DrawPolygon>();
         public List<Hull> hulls = new List<Hull>();
+        public ShadowManager(Game1 game) {
+            this.game = game;
+            light = new Light(game);
+            light.Size = new Vector2(1000, 1000);
+            light.position = new Vector2(200, 200);
+        }
         public void AddPolygon(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
         {
             List<Vector2> Polygon = new List<Vector2>();
@@ -30,13 +40,25 @@ namespace DrawShadow
         public void InitiateLight() {
             foreach (DrawPolygon light in lights)
             {
-                light.Hulls = this.hulls;
+                light.HulloffSet = Hull.count;
+                light.Hulls = this.CopyHulls();            
             }
+            lights[0].drawHulls = true;
         }
-        public void loadContent(SpriteBatch spriteBatch) {
+        public List<Hull> CopyHulls() {
+
+            List<Hull> NEWhulls = new List<Hull>();
+            foreach (Hull hull in this.hulls) {
+                NEWhulls.Add(new Hull(hull.Sides));
+            }
+            return NEWhulls;
+        }
+        public void loadContent(SpriteBatch spriteBatch,SpriteBatch LspriteBatch) {
+            this.lightSpriteBathch = LspriteBatch;
             foreach (DrawPolygon light in lights) {
                 light.LoadContent(spriteBatch);
             }
+            light.LoadContent();
         }
         public void Update() {
             Vector2 MousePoint = new Vector2(Mouse.GetState().Position.X, Mouse.GetState().Position.Y);
@@ -49,12 +71,17 @@ namespace DrawShadow
                 }
                 light.Update();
             }
+            light.position = MousePoint;
+            light.update();
         }
         public void Draw() {
             foreach (DrawPolygon light in lights)
             {
                 light.Draw();
             }
+        }
+        public void DrawLight() {
+            light.draw(lightSpriteBathch);
         }
     }
 }

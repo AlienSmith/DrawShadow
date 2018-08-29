@@ -13,14 +13,13 @@
             public List<Trace> Sides;
             public List<Trace> Bound;
             public int id;
-            private static int count = 0;
+            public static int count = 0;
             public Hull(List<Trace> sides)
             {
                 this.Sides = sides;
                 this.id = Hull.count;
                 this.Bound = new List<Trace>();
                 Hull.count++;
-                HullContainer.hulls.Add(this);
             }
             public bool Equal(Hull another)
             {
@@ -36,6 +35,16 @@
         public void Update() {
             this.Bound = new List<Trace>();
         }
+        /*public static Hull Copy(Hull hull) {
+            return new Hull(hull.Sides);
+        }
+        public static List<Hull> Copy(List<Hull> Hulls) {
+            List<Hull> NewHalls = new List<Hull>();
+            foreach (Hull h in Hulls) {
+                NewHalls.Add(Hull.Copy(h));
+            }
+            return NewHalls;
+        }*/
         }
     }
 

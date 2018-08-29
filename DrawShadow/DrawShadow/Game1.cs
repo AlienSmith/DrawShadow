@@ -13,12 +13,16 @@ namespace DrawShadow
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        SpriteBatch lightSpriteBatch;
         //private DrawPolygon drawShadow;
         Vector2 startpoint = PolygongEntity.StartPoint;
         ShadowManager shadowManager;
+        public static Vector2 WINDOWSIZE = new Vector2(1000, 1000);
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = (int)Game1.WINDOWSIZE.X;
+            graphics.PreferredBackBufferHeight = (int)Game1.WINDOWSIZE.Y;
             Content.RootDirectory = "Content";
             //this.drawShadow = new DrawPolygon();
             //this.drawShadow.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
@@ -28,11 +32,13 @@ namespace DrawShadow
             //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /120f, MathHelper.Pi*2, (MathHelper.Pi / 60), new Vector2(0, 20)));
             //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi /80f, MathHelper.Pi*2, (MathHelper.Pi/60), new Vector2(-20, 0)));
             //this.drawShadow.Traces.AddRange(TraceHelperClass.Range(MathHelper.Pi / 60f, MathHelper.Pi * 2, (MathHelper.Pi / 60), new Vector2(0, -20)));
-            shadowManager = new ShadowManager();
+            shadowManager = new ShadowManager(this);
             shadowManager.AddPolygon(new Vector2(100, 100), new Vector2(200, 100), new Vector2(200, 200), new Vector2(100, 200));
             shadowManager.AddPolygon(new Vector2(300, 300), new Vector2(400, 300), new Vector2(400, 400), new Vector2(300, 400));
             shadowManager.AddPolygon(new Vector2(100, 400), new Vector2(200, 400), new Vector2(200, 500), new Vector2(100, 500));
-            shadowManager.addLight(MathHelper.Pi / 360f, new Vector2(0, 0));
+            shadowManager.addLight(MathHelper.Pi / 360f, new Vector2(-10, -10));
+            shadowManager.addLight(MathHelper.Pi / 720f, new Vector2(10, 10));
+            shadowManager.InitiateLight();
         }
 
         /// <summary>
@@ -45,7 +51,6 @@ namespace DrawShadow
         {
 
             // TODO: Add your initialization logic here
-            shadowManager.InitiateLight();
             base.Initialize();
         }
 
@@ -57,7 +62,8 @@ namespace DrawShadow
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            this.shadowManager.loadContent(spriteBatch);
+            lightSpriteBatch = new SpriteBatch(GraphicsDevice);
+            this.shadowManager.loadContent(spriteBatch,lightSpriteBatch);
             // TODO: use this.Content to load your game content here
         }
 
@@ -98,7 +104,9 @@ namespace DrawShadow
             shadowManager.Draw();
            
             spriteBatch.End();
-
+            lightSpriteBatch.Begin();
+            this.shadowManager.DrawLight();
+            lightSpriteBatch.End();
             base.Draw(gameTime);
         }
         /*public void PointLightUpdate() {

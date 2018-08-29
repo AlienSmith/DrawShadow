@@ -62,5 +62,16 @@ namespace DrawShadow
                 return "Start" + this.StartPoint + "Extend" + this.Extend;
             }
         }
+        /*public static Trace Copy(Trace trace) {
+            return new Trace(trace.mytraceType, trace.StartPoint, trace.Extend);
+        }
+        public static List<Trace> Copy(List<Trace> traces)
+        {
+            List<Trace> NewTraces = new List<Trace>();
+            foreach (Trace tra in traces) {
+                NewTraces.Add(Trace.Copy(tra));
+            }
+            return NewTraces;
+        }*/
     }
 }
