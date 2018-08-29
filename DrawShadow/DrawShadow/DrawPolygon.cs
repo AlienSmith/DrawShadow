@@ -158,8 +158,8 @@ namespace DrawShadow
                     ray.mytraceType = TraceType.Line;
                     if (previousType == TraceType.Ray)
                     {
-                        Debug.WriteLine(Hulls.Count);
-                        Debug.WriteLine(currentId);
+                        //Debug.WriteLine(Hulls.Count);
+                        //Debug.WriteLine(currentId);
                         Hulls[currentId].Bound.Add(ray);
                         previousType = ray.mytraceType;
                         PreviousTrace = ray;
